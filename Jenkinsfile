@@ -2,14 +2,12 @@ pipeline {
     agent any
 
     tools {
-        maven 'Maven 3.9.9' // or whatever version you configured in Jenkins
-        jdk 'JDK17'         // make sure you have JDK configured
+        maven 'Maven 3.9.9'   // Make sure this is defined in Jenkins Global Tool Config
+        jdk 'JDK17'           // Same name as your JDK tool in Jenkins
     }
 
     environment {
-        SONARQUBE = credentials('sonar-token') // optional if using credentials manager
-        JAVA_HOME = tool name: 'JDK17', type: 'jdk'
-    	PATH = "${JAVA_HOME}/bin:${env.PATH}"
+        SONARQUBE = credentials('sonar-token') // Jenkins credential ID for SonarQube token
     }
 
     stages {
@@ -27,10 +25,13 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('SonarQube') {
-                    sh './mvnw verify sonar:sonar \
+                withSonarQubeEnv('SonarQube') { // Must match your Jenkins SonarQube server name
+                    sh """
+                    ./mvnw verify sonar:sonar \
                         -Dsonar.projectKey=petclinic \
-                        -Dsonar.host.url=http://localhost:9000'
+                        -Dsonar.host.url=http://localhost:9000 \
+                        -Dsonar.token=${SONARQUBE}
+                    """
                 }
             }
         }
@@ -42,28 +43,28 @@ pipeline {
                 }
             }
         }
+
+        stage('Dependency-Track Upload') {
+            steps {
+                sh '''
+                curl -X PUT "http://localhost:8081/api/v1/bom" \
+                    -H "X-Api-Key: odt_QHc4A3lt_UzhWlAXRvTrEjZRr7zCbRp51eFZYK45h" \
+                    -H "Content-Type: multipart/form-data" \
+                    -F "project=af4689e3-a6dc-4c6f-ab60-dddf82a4b226" \
+                    -F "autoCreate=true" \
+                    -F "bom=@target/bom.xml"
+                '''
+            }
+        }
     }
 
     post {
         success {
-            echo '✅ Build and analysis successful!'
+            echo '✅ Build, analysis, and upload successful!'
         }
         failure {
             echo '❌ Build or analysis failed!'
         }
-    }
-}
-
-stage('Dependency-Track Upload') {
-    steps {
-        sh '''
-        curl -X PUT "http://localhost:8081/api/v1/bom" \
-            -H "X-Api-Key: odt_QHc4A3lt_UzhWlAXRvTrEjZRr7zCbRp51eFZYK45h" \
-            -H "Content-Type: multipart/form-data" \
-            -F "project=af4689e3-a6dc-4c6f-ab60-dddf82a4b226" \
-            -F "autoCreate=true" \
-            -F "bom=@target/bom.xml"
-        '''
     }
 }
 
