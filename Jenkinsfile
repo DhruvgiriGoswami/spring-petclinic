@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     tools {
-        maven 'Maven 3.9.6' // or whatever version you configured in Jenkins
+        maven 'Maven 3.9.9' // or whatever version you configured in Jenkins
         jdk 'JDK17'         // make sure you have JDK configured
     }
 
@@ -13,7 +13,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/spring-projects/spring-petclinic.git'
+                git branch: 'main', url: 'https://github.com/DhruvgiriGoswami/spring-petclinic'
             }
         }
 
