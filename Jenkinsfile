@@ -7,7 +7,7 @@ pipeline {
     }
 
     environment {
-        SONARQUBE = credentials('ssonarqube_Global_ID') // optional if using credentials manager
+        SONARQUBE = credentials('sonar-token') // optional if using credentials manager
     }
 
     stages {
