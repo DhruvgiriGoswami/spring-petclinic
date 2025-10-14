@@ -8,6 +8,8 @@ pipeline {
 
     environment {
         SONARQUBE = credentials('sonar-token') // optional if using credentials manager
+        JAVA_HOME = tool name: 'JDK17', type: 'jdk'
+    	PATH = "${JAVA_HOME}/bin:${env.PATH}"
     }
 
     stages {
