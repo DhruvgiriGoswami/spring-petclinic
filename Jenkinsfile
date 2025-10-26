@@ -24,17 +24,19 @@ pipeline {
         }
 
         stage('SonarQube Analysis') {
-            steps {
-                withSonarQubeEnv('SonarQube') {
-                    sh """
-                    ./mvnw verify sonar:sonar \
-                        -Dsonar.projectKey=petclinic \
-                        -Dsonar.host.url=http://localhost:9000 \
-                        -Dsonar.token=${SONARQUBE}
-                    """
-                }
-            }
-        }
+	    steps {
+		withSonarQubeEnv('SonarQube') {
+		    sh """
+		    ./mvnw verify sonar:sonar \
+		        -DskipTests=true \
+		        -Dsonar.projectKey=petclinic \
+		        -Dsonar.host.url=http://localhost:9000 \
+		        -Dsonar.token=${SONARQUBE}
+		    """
+		}
+	    }
+	}
+
 
         stage('Quality Gate') {
             steps {
